@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSI: 物理｜TEAM MISSION 完成版</title>
+    <style>
+        /* 【AI対策】画面全体のテキスト選択・コピーを禁止 */
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            background-color: #121212; color: #e0e0e0; 
+            margin: 0; padding: 20px; line-height: 1.6; 
+            padding-top: 80px; margin-bottom: 250px; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* ただし、入力欄だけは選択（編集）できるように許可 */
+        input, textarea, select {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; background-color: #1e1e1e; padding: 30px; border-radius: 10px; border-top: 5px solid #8e44ad; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        
+        h1 { color: #8e44ad; text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; letter-spacing: 2px; }
+        h2 { color: #3498db; font-size: 1.3em; margin-top: 30px; border-left: 5px solid #3498db; padding-left: 10px; background-color: #252525; padding: 10px; border-radius: 0 5px 5px 0;}
+        
+        /* 巨大タイマーバー */
+        #timerContainer { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #111; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.8); display: none; flex-direction: column; }
+        #timerText { text-align: center; font-size: 32px; font-weight: bold; font-family: monospace; color: #fff; letter-spacing: 3px; line-height: 50px; }
+        #progressBar { height: 20px; background-color: #2ecc71; width: 100%; transition: width 1s linear, background-color 0.5s; }
+        
+        .danger-mode #timerContainer { background-color: #4a0000; }
+        .danger-mode #progressBar { background-color: #e74c3c; animation: blinker 1s linear infinite; }
+        .danger-mode #timerText { color: #e74c3c; }
+        @keyframes blinker { 50% { opacity: 0.5; } }
+
+        /* ログイン・役割入力 */
+        #loginScreen { text-align: center; padding: 20px; }
+        .login-select { padding: 10px; font-size: 18px; margin: 5px; background-color: #333; color: #fff; border: 1px solid #8e44ad; border-radius: 5px; }
+        .role-input { display: flex; justify-content: center; align-items: center; margin: 10px 0; }
+        .role-input label { width: 150px; text-align: right; margin-right: 15px; font-weight: bold; color: #3498db; }
+        .role-input input { padding: 8px; font-size: 16px; width: 200px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #fff; }
+        
+        .mission-box { background-color: #2c3e50; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #f1c40f; }
+        .evidence { background-color: #000; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; color: #2ecc71; border: 1px solid #27ae60; }
+        
+        .section-hidden { display: none; }
+        .question-block { margin-bottom: 15px; background-color: #2a2a2a; padding: 15px; border-radius: 5px; border: 1px dashed #555; }
+        .keyword-badge { display: inline-block; background-color: #d35400; color: white; padding: 2px 8px; border-radius: 3px; margin: 0 3px; font-size: 0.9em; font-weight: bold; }
+        
+        input[type="number"], select { padding: 10px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #fff; }
+        input[type="number"] { width: 120px; margin-right: 10px; }
+        select { width: 100%; margin-top: 10px; }
+        textarea { width: 100%; height: 100px; padding: 10px; font-size: 16px; background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; resize: vertical; margin-top: 10px; box-sizing: border-box; }
+        
+        button.action-btn { padding: 12px 20px; font-size: 18px; cursor: pointer; background-color: #8e44ad; color: white; border: none; border-radius: 5px; font-weight: bold; transition: all 0.2s; display: block; width: 100%; margin-top: 15px; box-shadow: 0 4px 0 #5e2c73; }
+        button.action-btn:hover { background-color: #9b59b6; transform: translateY(2px); box-shadow: 0 2px 0 #5e2c73; }
+        button.action-btn:disabled { background-color: #555; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .svg-container { background-color: #222; border-radius: 5px; padding: 10px; text-align: center; margin: 15px 0; border: 1px dashed #555; }
+        .hint-figure { background:#171b20; border:1px solid #51606f; border-radius:10px; margin:10px 0 14px; padding:8px; text-align:center; }
+        .hint-figure .hint-label { color:#f1c40f; font-size:.82em; font-weight:bold; letter-spacing:.04em; margin-bottom:4px; }
+        .hint-figure svg { width:100%; max-width:560px; height:auto; display:block; margin:auto; }
+        .hint-figure svg text { font-family:Arial,'Yu Gothic',sans-serif; }
+        .required-submit-box{background:#3b2411;border:2px solid #f1c40f;border-radius:12px;padding:16px;margin:16px 0;text-align:center;}
+        .required-submit-box strong{color:#ffd54f;font-size:1.08em;}
+        
+        /* ログ画面 */
+        #logConsole { position: fixed; bottom: 0; left: 0; width: 100%; height: 200px; background-color: #000; color: #0f0; font-family: monospace; font-size: 14px; border-top: 3px solid #333; z-index: 100; display: flex; flex-direction: column; }
+        #logHeader { background-color: #222; color: #fff; padding: 5px 15px; font-weight: bold; font-size: 12px; }
+        #logMessages { padding: 10px 15px; overflow-y: auto; flex-grow: 1; }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px dashed #333; padding-bottom: 5px; }
+        .log-time { color: #888; margin-right: 10px; }
+        .log-err { color: #ff4500; }
+        .log-ok { color: #2ecc71; }
+        
+        .stamp-container { min-height: 40px; margin-top: 10px; text-align: center; font-weight: bold; font-size: 1.2em; }
+        .success-text { color: #2ecc71; }
+        .fail-text { color: #e74c3c; }
+
+        /* タイムアップ画面 */
+        #timeupScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 2000; color: #e74c3c; justify-content: center; align-items: center; flex-direction: column; text-align: center; font-weight: bold; }
+        #timeupScreen h1 { font-size: 4em; margin-bottom: 10px; letter-spacing: 5px; text-shadow: 0 0 20px #e74c3c; }
+    
+
+
+        /* 班→個人 引き継ぎ画面 */
+        .handoff-panel{display:none;background:linear-gradient(135deg,#14202b,#20374b);border:3px solid #f1c40f;border-radius:16px;padding:22px;margin-top:18px;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+        .handoff-panel h3{font-size:1.65em;color:#f1c40f;margin:0 0 8px}.handoff-step{background:#0d141b;border:1px solid #43586a;border-radius:12px;padding:12px;margin:10px 0;text-align:left}.handoff-step b{color:#7ed6ff}.handoff-qr-wrap{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;margin:18px 0}.handoff-qr{background:white;border-radius:14px;padding:10px;width:230px;min-height:230px;display:flex;align-items:center;justify-content:center}.handoff-qr img{width:210px;height:210px;display:block}.handoff-code{font-family:monospace;font-size:1.6em;font-weight:900;color:#fff;background:#7d3c98;border-radius:10px;padding:10px 16px;display:inline-block;letter-spacing:.12em}.handoff-url{font-size:.78em;color:#b8c7d4;word-break:break-all;background:#0b1117;border-radius:8px;padding:9px;margin-top:8px;user-select:text;-webkit-user-select:text}.handoff-btn{border:0;border-radius:10px;padding:12px 15px;margin:5px;font-size:15px;font-weight:800;cursor:pointer}.handoff-btn.copy{background:#3498db;color:white}.handoff-btn.test{background:#ff8a65;color:white}
+
+        .carry-weapons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0;text-align:left}
+        .carry-weapon{background:#0b1218;border:1px solid #3e5364;border-radius:10px;padding:10px 12px;color:#d9edf8;font-size:.9em}
+        .carry-weapon b{color:#73d3ff}
+        .api-warning{max-width:720px;margin:12px auto;padding:10px 12px;border-radius:10px;background:#492020;border:1px solid #e57373;color:#ffcdd2;font-weight:bold;font-size:.9em}
+        .api-ok{background:#163c27;border-color:#4caf50;color:#c8f7d4}
+        @media(max-width:600px){.carry-weapons{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+
+<!-- タイマーバー -->
+<div id="timerContainer">
+    <div id="timerText">⏳ 証拠隠滅まで <span id="timeDisplay">08:00</span></div>
+    <div id="progressBar"></div>
+</div>
+
+<!-- ログイン画面 -->
+<div id="loginScreen" class="container">
+    <h1>🚨 CSI: 物理 捜査システム</h1>
+    <p>難易度クラス：MAX / 制限時間：8分<br>クラス・班を選択し、担当者の氏名を入力せよ。</p>
+    <div id="apiStatus" class="api-warning">本部との通信設定を確認中…</div>
+    
+    <div style="margin-bottom: 20px;">
+        <select id="classSelect" class="login-select" style="width: auto;">
+            <option value="1">3年1組</option><option value="2">3年2組</option><option value="3">3年3組</option>
+        </select>
+        <select id="groupSelect" class="login-select" style="width: auto;">
+            <script>for(let i=1; i<=9; i++) document.write(`<option value="${i}">${i}班</option>`);</script>
+        </select>
+    </div>
+
+    <div style="background-color: #2a2a2a; padding: 20px; border-radius: 5px; display: inline-block;">
+        <div class="role-input"><label>💻 タブレット操作係:</label><input type="text" id="roleOp"></div>
+        <div class="role-input"><label>🧮 データ計算係:</label><input type="text" id="roleCalc"></div>
+        <div class="role-input"><label>🗣️ 論理説明係:</label><input type="text" id="roleLog"></div>
+    </div>
+    
+    <button onclick="startSystem()" class="action-btn" style="background-color: #c0392b; box-shadow: 0 4px 0 #8a281e; max-width: 400px; margin: 30px auto;">タイマー起動 ＆ 捜査開始</button>
+</div>
+
+<!-- メインアプリ画面 -->
+<div id="mainApp" class="container section-hidden">
+    
+    <div class="mission-box">
+        <strong>【8分間 サバイバル捜査】</strong><br>
+        証拠が隠滅される前に、4つのファイルに隠された物理的な矛盾をすべて論破せよ。<br>
+        <b>ここで使った「捜査ノウハウ」は、事件解決後の個人ミッションへ引き継がれる。</b><br>
+        班の中で手分けして考えよう。（※画面のコピーは無効化されている）
+    </div>
+
+    <!-- 第1節：速さと空走距離 -->
+    <div id="section1">
+        <h2>📁 ファイル1：消えた空走距離</h2>
+        <div class="evidence">
+            [防犯カメラ解析データ]<br>
+            ・車は0.1秒間に <span id="distPer01">--</span> m 進んでいた。<br>
+            ・運転手の反応時間：<span id="reactTime">--</span> 秒
+        </div>
+        <div class="question-block">
+            <p>Q1. ブレーキ直前の本当の速さ(m/s)を計算せよ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：0.1秒でどれだけ進む？</div><svg viewBox="0 0 520 105" role="img" aria-label="0.1秒間の移動距離を示す図"><line x1="55" y1="68" x2="465" y2="68" stroke="#8795a1" stroke-width="4"/><circle cx="95" cy="67" r="11" fill="#3498db"/><circle cx="385" cy="67" r="11" fill="#3498db"/><path d="M118 42 H362" stroke="#f1c40f" stroke-width="4" marker-end="url(#a1)"/><defs><marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f1c40f"/></marker></defs><text x="190" y="32" fill="#f1c40f" font-size="17">0.1秒で <tspan id="hintDist01">--</tspan> m</text><text x="58" y="95" fill="#bdc3c7" font-size="13">時刻0</text><text x="360" y="95" fill="#bdc3c7" font-size="13">0.1秒後</text></svg></div>
+            <input type="number" id="ansSpeed" placeholder="速さ"> m/s 
+        </div>
+        <div class="question-block">
+            <p>Q2. 運転手の反応時間の間に車が進んだ距離（空走距離）は何mか？</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：反応している間も車は進み続ける</div><svg viewBox="0 0 520 115" role="img" aria-label="反応時間と空走距離の図"><rect x="42" y="47" width="70" height="32" rx="7" fill="#3498db"/><circle cx="58" cy="82" r="8" fill="#111"/><circle cx="96" cy="82" r="8" fill="#111"/><path d="M125 64 H440" stroke="#f39c12" stroke-width="5" stroke-dasharray="10 7"/><text x="155" y="42" fill="#f1c40f" font-size="16">反応時間 <tspan id="hintReact">--</tspan> 秒</text><text x="160" y="96" fill="#bdc3c7" font-size="14">速さ × 時間 → 空走距離</text></svg></div>
+            <input type="number" id="ansDist" step="0.1" placeholder="空走距離"> m 
+        </div>
+        <button onclick="checkSec1()" class="action-btn">ファイル1を解析</button>
+        <div class="stamp-container" id="res1"></div>
+    </div>
+
+    <!-- 第2節：停止距離 -->
+    <div id="section2" class="section-hidden">
+        <h2>📁 ファイル2：絶望の停止距離</h2>
+        <div class="evidence">
+            [現場検証データ]<br>
+            ・道路に残されたブレーキ痕（制動距離）は <span id="brakeDist">--</span> m だった。<br>
+            ・危険に気づいた地点から、壁までの距離は「20m」だった。
+        </div>
+        <div class="question-block">
+            <p>Q3. ファイル1で求めた「空走距離」と、上の「制動距離」を足して、車が完全に止まるまでの『停止距離』を計算せよ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：止まるまでの道のりを2つに分ける</div><svg viewBox="0 0 520 120" role="img" aria-label="空走距離と制動距離を足す図"><line x1="50" y1="70" x2="470" y2="70" stroke="#777" stroke-width="5"/><line x1="80" y1="48" x2="240" y2="48" stroke="#f1c40f" stroke-width="7"/><line x1="240" y1="48" x2="440" y2="48" stroke="#e74c3c" stroke-width="7"/><text x="105" y="34" fill="#f1c40f" font-size="15">空走距離</text><text x="292" y="34" fill="#ff8a80" font-size="15">制動距離 <tspan id="hintBrake">--</tspan> m</text><text x="163" y="103" fill="#ecf0f1" font-size="16">空走距離 ＋ 制動距離 ＝ 停止距離</text></svg></div>
+            <input type="number" id="ansTotalDist" step="0.1" placeholder="停止距離"> m 
+        </div>
+        <div class="question-block">
+            <p>Q4. 停止距離と壁までの距離(20m)を比較し、最も適切な説明を選べ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：停止距離と「壁まで20m」を比べる</div><svg viewBox="0 0 520 120" role="img" aria-label="危険地点から壁まで20mの図"><rect x="55" y="51" width="65" height="30" rx="6" fill="#3498db"/><circle cx="70" cy="84" r="7" fill="#111"/><circle cx="105" cy="84" r="7" fill="#111"/><line x1="125" y1="69" x2="430" y2="69" stroke="#f1c40f" stroke-width="4"/><line x1="430" y1="27" x2="430" y2="96" stroke="#e74c3c" stroke-width="10"/><text x="225" y="52" fill="#f1c40f" font-size="17">壁まで 20m</text><text x="162" y="103" fill="#bdc3c7" font-size="14">あなたが求めた停止距離は20mより短い？長い？</text></svg></div>
+            <select id="ansCrash">
+                <option value="0">選択してください</option>
+                <option value="safe">A. 停止距離は20mより短いので、壁の手前で完全に止まれる。</option>
+                <option value="brakeOnly">B. 制動距離だけを20mと比べればよいので、空走距離は考えなくてよい。</option>
+                <option value="crash">C. 空走距離と制動距離を合わせた停止距離が20mを超えるため、衝突する。</option>
+                <option value="timeOnly">D. 反応時間が1秒前後なら短いので、停止距離にはほとんど影響しない。</option>
+                <option value="same">E. どんな速さでも、危険に気づいてから止まる距離はほぼ同じになる。</option>
+            </select>
+        </div>
+        <button onclick="checkSec2()" class="action-btn">ファイル2を解析</button>
+        <div class="stamp-container" id="res2"></div>
+    </div>
+
+    <!-- 第3節：斜面と質量 -->
+    <div id="section3" class="section-hidden">
+        <h2>📁 ファイル3：斜面と質量の罠</h2>
+        <p><strong>【運転手】</strong>「アクセルは踏んでない！今回は荷物をたくさん積んで車が重かったから、下り坂で勝手に猛加速したんだ！」</p>
+        <div class="question-block">
+            <p>Q5. 「車が重かったから加速した」という主張について、最も適切な説明を選べ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：同じ斜面・同じ位置、違うのは質量</div><svg viewBox="0 0 520 150" role="img" aria-label="同じ斜面上の1kgと2kgの台車"><path d="M65 120 L450 120 L450 35 Z" fill="#34495e" stroke="#95a5a6" stroke-width="3"/><g transform="translate(280,65) rotate(-12)"><rect x="0" y="0" width="62" height="31" rx="5" fill="#5dade2"/><circle cx="13" cy="34" r="7" fill="#111"/><circle cx="50" cy="34" r="7" fill="#111"/><text x="18" y="21" fill="white" font-size="15">1kg</text></g><g transform="translate(195,84) rotate(-12)"><rect x="0" y="0" width="62" height="31" rx="5" fill="#af7ac5"/><circle cx="13" cy="34" r="7" fill="#111"/><circle cx="50" cy="34" r="7" fill="#111"/><text x="18" y="21" fill="white" font-size="15">2kg</text></g><text x="92" y="30" fill="#f1c40f" font-size="16">速さの増え方は質量だけで決まる？</text></svg></div>
+            <select id="ansMass">
+                <option value="0">選択してください</option>
+                <option value="heavyFast">A. 正しい。重い車ほど重力が大きいので、必ず速さの増え方も大きくなる。</option>
+                <option value="lightFast">B. 間違い。軽い車ほど動きやすいので、軽い方が速さの増え方が大きくなる。</option>
+                <option value="correct">C. 間違い。同じ斜面なら、質量が大きくても速さの増え方は変わらない。</option>
+                <option value="constant">D. 間違い。斜面でもアクセルを踏まなければ速さは一定のままである。</option>
+                <option value="noGravity">E. 正しい。下り坂では重力は物体にはたらかなくなるので、重い車だけが加速する。</option>
+            </select>
+        </div>
+        <div class="question-block">
+            <p>Q6. アクセルを踏まなくても斜面で加速する本当の理由を説明せよ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：重力を「斜面に平行」と「垂直」に分けて考える</div><svg viewBox="0 0 520 180" role="img" aria-label="斜面上の重力の分力"><path d="M70 145 L450 145 L450 55 Z" fill="#34495e"/><rect x="270" y="88" width="58" height="34" rx="5" fill="#3498db" transform="rotate(-13 299 105)"/><line x1="300" y1="103" x2="300" y2="160" stroke="#e74c3c" stroke-width="5"/><polygon points="300,166 294,154 306,154" fill="#e74c3c"/><text x="309" y="154" fill="#ff8a80" font-size="14">重力</text><line x1="296" y1="110" x2="225" y2="128" stroke="#f1c40f" stroke-width="5"/><polygon points="216,131 229,121 232,134" fill="#f1c40f"/><text x="160" y="117" fill="#f1c40f" font-size="14">斜面に平行な分力</text><line x1="300" y1="108" x2="314" y2="58" stroke="#2ecc71" stroke-width="4"/><text x="325" y="64" fill="#7bed9f" font-size="14">斜面に垂直</text></svg></div>
+            <p style="font-size: 0.9em; color: #aaa;">必須キーワード：<span class="keyword-badge">重力</span> <span class="keyword-badge">分力</span> <span class="keyword-badge">平行</span></p>
+            <textarea id="ansSlopeHard" placeholder="下り坂では、車にはたらく..."></textarea>
+        </div>
+        <button onclick="checkSec3()" class="action-btn">ファイル3を論破</button>
+        <div class="stamp-container" id="res3"></div>
+    </div>
+
+    <!-- 第4節：作用反作用 -->
+    <div id="section4" class="section-hidden">
+        <h2>📁 ファイル4：衝撃の作用反作用</h2>
+        <p><strong>【運転手】</strong>「壁からの力が強かったんだ！そもそも、車が壁を押す力と、壁が車を押す力が『つり合って』いたから止まったんだろ？」</p>
+        <div class="question-block">
+            <p>Q7. 運転手の「2つの力が『つり合って』いた」という主張について、最も適切な説明を選べ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：矢印が「どの物体にはたらく力」かを見る</div><svg viewBox="0 0 520 145" role="img" aria-label="車と壁の作用反作用"><rect x="85" y="65" width="105" height="45" rx="8" fill="#3498db"/><circle cx="110" cy="114" r="10" fill="#111"/><circle cx="166" cy="114" r="10" fill="#111"/><rect x="360" y="28" width="25" height="98" fill="#95a5a6"/><line x1="195" y1="76" x2="344" y2="76" stroke="#f1c40f" stroke-width="5"/><polygon points="352,76 338,69 338,83" fill="#f1c40f"/><line x1="350" y1="101" x2="205" y2="101" stroke="#e74c3c" stroke-width="5"/><polygon points="197,101 211,94 211,108" fill="#e74c3c"/><text x="208" y="59" fill="#f1c40f" font-size="14">車が壁を押す力</text><text x="216" y="128" fill="#ff8a80" font-size="14">壁が車を押す力</text></svg></div>
+            <select id="ansEquil">
+                <option value="0">選択してください</option>
+                <option value="sameObject">A. 正しい。大きさが同じで向きが反対なら、どの2力でも必ず「つり合い」である。</option>
+                <option value="wallBigger">B. 誤り。車が止まったので、壁が車を押す力の方が必ず大きい。</option>
+                <option value="carBigger">C. 誤り。動いていたのは車なので、車が壁を押す力の方が必ず大きい。</option>
+                <option value="correct">D. 誤り。2つの力は同じ大きさで反対向きだが、「別の物体」にはたらくので、つり合いではなく作用・反作用である。</option>
+                <option value="noPair">E. 正しい。壁は動かないので、壁から車への力ははたらいていない。</option>
+            </select>
+        </div>
+        <div class="question-block">
+            <p>Q8. 「壁からの力の方が強かった」という誤りを指摘し、車だけが大破した理由を説明せよ。</p><div class="hint-figure"><div class="hint-label">💡 ヒント図：力の大きさと「変形しやすさ」は別の話</div><svg viewBox="0 0 520 150" role="img" aria-label="車の変形と壁の作用反作用"><rect x="70" y="68" width="120" height="48" rx="9" fill="#3498db"/><path d="M188 70 L218 82 L188 112 Z" fill="#e67e22"/><circle cx="98" cy="120" r="10" fill="#111"/><circle cx="162" cy="120" r="10" fill="#111"/><rect x="330" y="30" width="30" height="100" fill="#95a5a6"/><line x1="220" y1="75" x2="318" y2="75" stroke="#f1c40f" stroke-width="5"/><line x1="318" y1="103" x2="220" y2="103" stroke="#e74c3c" stroke-width="5"/><text x="205" y="55" fill="#ecf0f1" font-size="14">左右の矢印の長さに注目</text><text x="75" y="42" fill="#ffb86b" font-size="14">車と壁の変形のしかたに注目</text></svg></div>
+            <p style="font-size: 0.9em; color: #aaa;">必須キーワード：<span class="keyword-badge">作用・反作用</span> <span class="keyword-badge">同じ大きさ</span> <span class="keyword-badge">吸収</span></p>
+            <textarea id="ansForceHard" placeholder="運転手の主張は間違っている。なぜなら..."></textarea>
+        </div>
+        <button onclick="checkSec4()" class="action-btn">最終ファイルを論破</button>
+        <div class="stamp-container" id="res4"></div>
+    </div>
+
+    <!-- 最終提出 -->
+    <div id="finalReport" class="section-hidden">
+        <h2 style="color: #f1c40f; text-align:center; font-size: 2em;">📝 任務完了！</h2>
+        <p style="text-align:center;">素晴らしい！制限時間内に全ての矛盾を暴きました。</p>
+        <div style="background:#101820;border:2px solid #f1c40f;border-radius:12px;padding:18px;margin:18px 0;text-align:center;">
+            <div style="font-size:1.7em;font-weight:bold;color:#f1c40f;">🎉 CASE CLOSED</div>
+            <p style="margin:8px 0 0;">坂道衝突事故の真相を解明した！<br><b>君たちは「物理捜査官」として認定された。</b></p>
+            <div class="carry-weapons">
+              <div class="carry-weapon"><b>FILE 1</b>　速さと移動距離を区別する</div>
+              <div class="carry-weapon"><b>FILE 1–2</b>　同じ速さで進む運動を読み取る</div>
+              <div class="carry-weapon"><b>FILE 3</b>　斜面上の運動を力から考える</div>
+              <div class="carry-weapon"><b>FILE 4</b>　作用・反作用とつり合いを区別する</div>
+            </div>
+            <p style="margin:10px 0 0;color:#dceeff;"><b>次の任務：</b>この捜査ノウハウを使い、未来の捜査官が挑戦する「新しい物理事件」を一人1作品つくれ。</p>
+        </div>
+        <div class="required-submit-box">
+            <strong>⚠️ CASE PASSを受け取るには「本部への送信」が必須です</strong><br>
+            <span style="font-size:.92em;color:#f7e6c4;">① 本部へ送信 → ② CASE PASS発行 → ③ 班員全員が自分の端末へ</span>
+        </div>
+        <button onclick="submitTeamMission()" style="background-color:#2ecc71;font-size:19px;padding:14px;box-shadow:0 4px 0 #27ae60;width:100%;border:none;border-radius:8px;color:white;font-weight:bold;cursor:pointer;" id="submitBtn">📨 捜査結果を本部へ送信し、CASE PASSを受け取る【必須】</button>
+        <div id="submitResult" style="margin-top: 12px; font-weight: bold; text-align: center;"></div>
+        <div id="handoffPanel" class="handoff-panel">
+          <h3>📱 ここからは「個人任務」です</h3>
+          <p>班の端末はここで終了。<b>班員全員が自分の端末</b>を準備してください。</p>
+          <div class="handoff-step"><b>STEP 1</b>　自分の端末で下のQRを読み取る</div>
+          <div class="handoff-step"><b>STEP 2</b>　出席番号を入力する</div>
+          <div class="handoff-step"><b>STEP 3</b>　自分だけの「物理の絵本」をつくる</div>
+          <div class="handoff-qr-wrap">
+            <div class="handoff-qr"><img id="handoffQr" alt="個人用アプリQRコード"><div id="qrFallback" style="display:none;color:#333;font-weight:bold">QRを表示できません。<br>下のリンクを使ってください。</div></div>
+            <div><div style="color:#ddd;font-size:.9em">SERVER ISSUED CASE PASS</div><div id="handoffCode" class="handoff-code">---</div><p style="max-width:300px">このPASSは、本部への提出が成功した班だけに発行されます。QRから入ると班のCASE CLOSEDが確認され、個人用画面では出席番号だけを入力します。</p></div>
+          </div>
+          <button class="handoff-btn copy" onclick="copyPersonalLink()">🔗 個人用リンクをコピー</button>
+          <button class="handoff-btn test" onclick="openPersonalSameDevice()">🧪 先生：この端末でテスト表示</button>
+          <div id="handoffUrlText" class="handoff-url"></div>
+          <p id="localFileWarning" style="display:none;color:#ffcc80;font-weight:bold">⚠ ローカルファイルで開いています。生徒端末へ渡すには、班用・個人用HTMLを同じWebサイト（例：GitHub Pages）に置いてください。</p>
+        </div>
+    </div>
+</div>
+
+<!-- ログ画面 -->
+<div id="logConsole" class="section-hidden">
+    <div id="logHeader"><span id="logTitle">▶ 捜査ログ</span></div>
+    <div id="logMessages"></div>
+</div>
+
+<!-- タイムアップ画面 -->
+<div id="timeupScreen">
+    <h1>🚨 TIME UP 🚨</h1>
+    <p>8分経過。証拠はすべて隠滅された...</p>
+    <button onclick="location.reload()" style="margin-top: 30px; padding: 10px 30px; font-size: 20px; background-color: #555; border: none; color: white; border-radius: 5px; cursor:pointer;">最初からやり直す</button>
+</div>
+
+
+<script>
+    // ===== 先生の設定エリア =====
+    // 共有用GASをデプロイし、/exec URLをここに貼り付けてください。
+    const API_URL = "https://script.google.com/a/macros/v.nakijin.ed.jp/s/AKfycbxXpOTZgrIXV904J7kwrr6SbTrNlanhH3B8CIaSs8aqQSXrqeyG-MlbjhVr4nFYpL92/exec";
+    // 班用CSIと同じWebフォルダに置く個人用アプリのファイル名
+    const PERSONAL_APP_FILE = "PHYSICS_STORY_BOOK_個人ミッション_完成版.html";
+    // ?demo=1 をURL末尾につけると、通信なしで先生が動作確認できます（授業では使用しない）。
+    const DEMO_MODE = new URLSearchParams(location.search).get('demo') === '1';
+
+    // ★タイマー設定（8分 = 480秒）★
+    const TIME_LIMIT = 480; 
+    // ※もし授業で短すぎると感じた場合は、上記の「480」を「600（10分）」などに書き換えるだけで調整可能です。
+
+    let classNum, groupNum, roleOp, roleCalc, roleLog;
+    let randomDist, randomReact, correctSpeed, correctRunDist, correctBrakeDist, correctTotalDist;
+    let logHistoryText = ""; 
+    let timeLeft = TIME_LIMIT; 
+    let timerInterval;
+    let caseLogSent = false;
+    let casePassToken = '';
+    let casePassCode = '';
+    let caseLessonKey = '';
+
+    function apiConfigured(){ return API_URL.startsWith('https://script.google.com/') && API_URL.includes('/exec'); }
+
+    function refreshApiStatus(){
+        const el=document.getElementById('apiStatus');
+        if(!el) return;
+        if(DEMO_MODE){ el.className='api-warning api-ok'; el.textContent='🧪 先生用デモモード：本部送信は端末内で模擬します。'; return; }
+        if(apiConfigured()){ el.className='api-warning api-ok'; el.textContent='✅ CSI本部 接続設定済み｜事件解決後にCASE PASSを発行します。'; }
+        else { el.className='api-warning'; el.textContent='⚠ 先生へ：GASの /exec URL が未設定です。このままではCASE PASSを発行できません。'; }
+    }
+
+    async function postApi(action,payload){
+        const r=await fetch(API_URL,{method:'POST',body:new URLSearchParams({action,payload:JSON.stringify(payload)})});
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return await r.json();
+    }
+
+    function startSystem() {
+        if(!DEMO_MODE && !apiConfigured()){
+            alert('先生の設定が必要です。GASの /exec URL を設定してから授業を開始してください。');
+            return;
+        }
+        classNum = document.getElementById('classSelect').value;
+        groupNum = document.getElementById('groupSelect').value;
+        roleOp = document.getElementById('roleOp').value || "未入力";
+        roleCalc = document.getElementById('roleCalc').value || "未入力";
+        roleLog = document.getElementById('roleLog').value || "未入力";
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('logConsole').style.display = 'flex';
+        document.getElementById('timerContainer').style.display = 'flex';
+        
+        document.getElementById('logTitle').textContent = `▶ 3年${classNum}組 ${groupNum}班`;
+        addLog(`[SYSTEM] ログイン完了。制限時間8分、カウントダウン開始。`);
+        
+        const distances = [1.2, 1.4, 1.5, 1.6]; 
+        const reactions = [0.8, 1.0, 1.2]; 
+        randomDist = distances[Math.floor(Math.random() * distances.length)];
+        randomReact = reactions[Math.floor(Math.random() * reactions.length)];
+        
+        correctSpeed = Math.round(randomDist / 0.1); 
+        correctRunDist = (correctSpeed * randomReact).toFixed(1);
+        
+        let brakeMap = {12: 14.4, 14: 19.6, 15: 22.5, 16: 25.6};
+        correctBrakeDist = brakeMap[correctSpeed];
+        correctTotalDist = (parseFloat(correctRunDist) + correctBrakeDist).toFixed(1);
+        
+        document.getElementById('distPer01').textContent = randomDist.toFixed(1);
+        document.getElementById('reactTime').textContent = randomReact.toFixed(1);
+        document.getElementById('brakeDist').textContent = correctBrakeDist.toFixed(1);
+        document.getElementById('hintDist01').textContent = randomDist.toFixed(1);
+        document.getElementById('hintReact').textContent = randomReact.toFixed(1);
+        document.getElementById('hintBrake').textContent = correctBrakeDist.toFixed(1);
+
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            
+            // 残り3分（180秒）で危険モード
+            if(timeLeft === 180) {
+                document.body.classList.add('danger-mode');
+                addLog(`[WARNING] 残り3分！システムが警告を発しています！`, 'log-err');
+            }
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeUp();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        let s = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timeDisplay').textContent = `${m}:${s}`;
+        
+        let percent = (timeLeft / TIME_LIMIT) * 100;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        
+        if(percent < 30) document.getElementById('progressBar').style.backgroundColor = "#e74c3c";
+        else if(percent < 60) document.getElementById('progressBar').style.backgroundColor = "#f1c40f";
+    }
+
+    function timeUp() {
+        document.getElementById('timeupScreen').style.display = 'flex';
+        addLog(`[SYSTEM] タイムアップ。`, 'log-err');
+    }
+
+    function addLog(message, statusClass = "") {
+        let now = new Date();
+        let timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        let logBox = document.getElementById('logMessages');
+        let entry = document.createElement('div');
+        entry.className = "log-entry";
+        entry.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${statusClass}">${message}</span>`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+        logHistoryText += `[${timeStr}] ${message}\n`;
+    }
+
+    function showResult(elementId, isSuccess, message) {
+        let el = document.getElementById(elementId);
+        el.innerHTML = isSuccess ? `<span class="success-text">✔ ${message}</span>` : `<span class="fail-text">✖ ${message}</span>`;
+    }
+
+    function checkSec1() {
+        let speed = document.getElementById('ansSpeed').value;
+        let dist = document.getElementById('ansDist').value;
+        addLog(`[解析1] 速さ:${speed}, 空走:${dist}`);
+        
+        if(speed == correctSpeed && parseFloat(dist).toFixed(1) == correctRunDist) {
+            addLog(`[判定] クリア！`, 'log-ok');
+            showResult('res1', true, "解析完了。急いで次へ！");
+            document.getElementById('section2').style.display = 'block';
+            document.getElementById('section1').querySelector('button').disabled = true;
+        } else {
+            showResult('res1', false, "計算ミスだ！");
+        }
+    }
+
+    function checkSec2() {
+        let total = document.getElementById('ansTotalDist').value;
+        let crash = document.getElementById('ansCrash').value;
+        addLog(`[解析2] 停止距離:${total}, 判定:${crash}`);
+        
+        if(parseFloat(total).toFixed(1) == correctTotalDist && crash === "crash") {
+            addLog(`[判定] クリア！`, 'log-ok');
+            showResult('res2', true, "衝突は免れなかった。次へ！");
+            document.getElementById('section3').style.display = 'block';
+            document.getElementById('section2').querySelector('button').disabled = true;
+        } else {
+            showResult('res2', false, "空走＋制動距離の合計が合わない、または結論が間違っている！");
+        }
+    }
+
+    function checkSec3() {
+        let mass = document.getElementById('ansMass').value;
+        let text = document.getElementById('ansSlopeHard').value;
+        let missing = ['重力', '分力', '平行'].filter(kw => !text.includes(kw));
+
+        if(mass !== "correct") {
+            showResult('res3', false, "質量の引っかけに騙されている！");
+        } else if(text.length < 15 || missing.length > 0) {
+            showResult('res3', false, `説明不足。不足語句：${missing.join(', ')}`);
+        } else {
+            addLog(`[解析3] 質量トラップ回避。説明完了。`, 'log-ok');
+            showResult('res3', true, "見事な論破だ！最終ファイルへ！");
+            document.getElementById('section4').style.display = 'block';
+            document.getElementById('section3').querySelector('button').disabled = true;
+        }
+    }
+
+    function checkSec4() {
+        let equil = document.getElementById('ansEquil').value;
+        let text = document.getElementById('ansForceHard').value;
+        let missing = ['作用・反作用', '同じ大きさ', '吸収'].filter(kw => !text.includes(kw));
+
+        if(equil !== "correct") {
+            showResult('res4', false, "「つり合い」の意味を勘違いしている！");
+        } else if(text.length < 15 || missing.length > 0) {
+            showResult('res4', false, `説明不足。不足語句：${missing.join(', ')}`);
+} else {
+            // ★修正ポイント：表示を書き換える「前」に残り時間を取得して保存しておく
+            let remainingTime = document.getElementById('timeDisplay').textContent;
+            
+            clearInterval(timerInterval); 
+            document.getElementById('timerContainer').style.backgroundColor = "#2ecc71";
+            document.getElementById('timerText').innerHTML = "✨ ALL CLEAR ✨";
+            document.body.classList.remove('danger-mode');
+            
+            // ★修正ポイント：保存しておいた時間を使ってログを書く
+            addLog(`[AI判定] 全ステージクリア！残り時間: ${remainingTime}`, 'log-ok');
+            showResult('res4', true, "すべての謎が解けた！");
+            document.getElementById('finalReport').style.display = 'block';
+            document.getElementById('section4').querySelector('button').disabled = true;
+        }
+    }
+
+    async function submitTeamMission() {
+        const btn=document.getElementById('submitBtn');
+        btn.disabled=true;
+        btn.innerText='本部へ送信中…';
+        const payload={
+            allClear:true,
+            classNum,groupNum,roleOp,roleCalc,roleLog,
+            remainingSeconds:timeLeft,
+            remainingText:document.getElementById('timeDisplay').textContent,
+            caseData:{distPer01:randomDist,reactionTime:randomReact,speed:correctSpeed,runDist:correctRunDist,brakeDist:correctBrakeDist,totalDist:correctTotalDist},
+            logText:logHistoryText
+        };
+        try{
+            let j;
+            if(DEMO_MODE){
+                j={ok:true,passToken:'DEMO-'+Date.now(),passCode:'DEMO2026',lessonKey:'DEMO',classNum:String(classNum),groupNum:String(groupNum)};
+            }else{
+                j=await postApi('submitTeam',payload);
+            }
+            if(!j.ok) throw new Error(j.error||'送信に失敗しました');
+            caseLogSent=true;
+            casePassToken=j.passToken;
+            casePassCode=j.passCode;
+            caseLessonKey=j.lessonKey||'';
+            document.getElementById('submitResult').innerHTML='<span style="color:#2ecc71;">✅ 本部への送信完了。正式なCASE PASSが発行されました！</span>';
+            btn.style.display='none';
+            preparePersonalHandoff();
+        }catch(e){
+            btn.disabled=false;
+            btn.innerText='📨 捜査結果を本部へ送信し、CASE PASSを受け取る【必須】';
+            document.getElementById('submitResult').innerHTML='<span style="color:#ff7675;">⚠ 送信できませんでした。通信状態またはGAS設定を確認して、もう一度送信してください。<br><small>'+escapeHtml(String(e.message||e))+'</small></span>';
+        }
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+    function personalTargetUrl(){
+        const u = new URL(PERSONAL_APP_FILE, window.location.href);
+        u.searchParams.set('pass', casePassToken);
+        if(DEMO_MODE){ u.searchParams.set('demo','1'); u.searchParams.set('classNum',classNum); u.searchParams.set('groupNum',groupNum); }
+        else u.searchParams.set('api', API_URL);
+        return u.href;
+    }
+
+    function preparePersonalHandoff(){
+        if(!caseLogSent || !casePassToken) return;
+        const panel=document.getElementById('handoffPanel');
+        panel.style.display='block';
+        const target=personalTargetUrl();
+        document.getElementById('handoffCode').textContent=casePassCode||'PASS';
+        document.getElementById('handoffUrlText').textContent=target;
+        const qr=document.getElementById('handoffQr');
+        const fallback=document.getElementById('qrFallback');
+        qr.style.display='block'; fallback.style.display='none';
+        qr.onerror=()=>{qr.style.display='none';fallback.style.display='block';};
+        qr.src='https://api.qrserver.com/v1/create-qr-code/?size=210x210&margin=8&data='+encodeURIComponent(target);
+        if(location.protocol==='file:') document.getElementById('localFileWarning').style.display='block';
+        panel.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    async function copyPersonalLink(){
+        const target=personalTargetUrl();
+        try{await navigator.clipboard.writeText(target); alert('個人ミッション用リンクをコピーしました。');}
+        catch(e){prompt('このリンクをコピーしてください',target);}
+    }
+    function openPersonalSameDevice(){window.open(personalTargetUrl(),'_blank');}
+
+    refreshApiStatus();
+</script>
+
+
+
+</body>
+</html>

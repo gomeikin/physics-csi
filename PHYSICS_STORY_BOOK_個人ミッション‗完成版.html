@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHYSICS STORY BOOK｜PERSONAL MISSION 完成版</title>
+<style>
+html,body{margin:0;min-height:100%;}
+/* =========================================================
+   PHYSICS STORY BOOK（CSIクリア後の個人制作モード）
+   ========================================================= */
+#storyApp{display:none;max-width:980px;margin:0 auto;padding:22px 18px 70px;color:#4b3b34;font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;}
+body.storybook-mode{background:linear-gradient(180deg,#fff7e8 0%,#eef9ff 55%,#fff5fb 100%);color:#4b3b34;padding:0;margin:0;min-height:100vh;user-select:auto;-webkit-user-select:auto;}
+body.storybook-mode #loginScreen,body.storybook-mode #mainApp,body.storybook-mode #logConsole,body.storybook-mode #timerContainer,body.storybook-mode #timeupScreen{display:none!important;}
+body.storybook-mode #storyApp{display:block;}
+body.storybook-mode input,body.storybook-mode textarea,body.storybook-mode select{user-select:auto;-webkit-user-select:auto;}
+.sb-topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid #f0d8be;padding:12px 16px;margin:0 -18px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.sb-brand{font-weight:900;font-size:clamp(18px,3vw,28px);color:#7a4a35;letter-spacing:.04em;}.sb-sub{font-size:12px;color:#876;}
+.sb-gear{border:0;background:#fff0dc;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:bold;color:#7a4a35;}
+.sb-panel{background:rgba(255,255,255,.92);border:2px solid #f0d8be;border-radius:22px;padding:22px;box-shadow:0 12px 28px rgba(106,76,55,.12);margin:16px 0;}
+.sb-hidden{display:none!important;}.sb-center{text-align:center;}.sb-title{font-size:clamp(26px,5vw,44px);font-weight:900;color:#6d4c41;margin:.2em 0;}.sb-lead{font-size:17px;line-height:1.8;}
+.sb-btn{border:0;border-radius:14px;padding:13px 18px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.12);transition:.15s;}.sb-btn:hover{transform:translateY(1px);box-shadow:0 2px 0 rgba(0,0,0,.12)}.sb-btn.primary{background:#ff8a65;color:white}.sb-btn.blue{background:#64b5f6;color:white}.sb-btn.green{background:#66bb6a;color:white}.sb-btn.yellow{background:#ffd166;color:#614d28}.sb-btn.ghost{background:#fff3e0;color:#7a4a35;border:1px solid #f0d8be}.sb-btn.full{width:100%;}.sb-btn:disabled{background:#ccc;color:#777;cursor:not-allowed;box-shadow:none;}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.sb-field{margin:16px 0}.sb-field label{display:block;font-weight:900;margin-bottom:7px;color:#6d4c41}.sb-field input,.sb-field textarea,.sb-field select{width:100%;box-sizing:border-box;border:2px solid #e7cdb4;border-radius:14px;padding:12px 13px;background:#fffdf9;color:#4b3b34;font-size:16px;outline:none}.sb-field textarea{min-height:112px;resize:vertical}.sb-field input:focus,.sb-field textarea:focus,.sb-field select:focus{border-color:#ffad7d;box-shadow:0 0 0 3px rgba(255,173,125,.18)}
+.sb-badge{display:inline-block;border-radius:999px;padding:6px 11px;background:#fff0dc;border:1px solid #f2cfaa;font-size:13px;font-weight:800;margin:3px}.sb-theme{background:#eaf6ff;border-color:#b9def7;color:#23668f}.sb-anon{background:#f7efff;border-color:#dcc5ef;color:#6b4a83}
+.sb-transition{min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center}.sb-transition-card{max-width:700px;background:white;border-radius:28px;padding:34px;border:3px solid #ffd7b8;box-shadow:0 18px 40px rgba(88,57,37,.16)}.sb-case{font-size:clamp(42px,8vw,78px);font-weight:1000;color:#ff7043;text-shadow:0 4px 0 #ffe1d6;letter-spacing:.03em}
+.sb-mission{border:2px dashed #84c4ef;background:#f1f9ff;border-radius:18px;padding:15px;margin:14px 0;}.sb-mission strong{color:#2d77a8}
+.sb-progress{display:flex;justify-content:center;gap:9px;margin:12px 0 20px}.sb-dot{width:13px;height:13px;border-radius:50%;background:#e2cfbd}.sb-dot.on{background:#ff8a65;transform:scale(1.18)}
+.book-stage{max-width:760px;margin:0 auto}.book-shell{position:relative;background:#fffdf6;border:3px solid #d9b892;border-radius:24px;min-height:485px;box-shadow:0 16px 30px rgba(94,65,44,.18),inset 0 0 0 9px #fff7e8;padding:28px;overflow:hidden}.book-shell:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(#eee0ce,#d8c1a7,#eee0ce);opacity:.35}.book-page-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.book-page-num{font-weight:900;color:#aa7b59}.book-scene{border-radius:18px;min-height:145px;padding:20px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:58px;margin:12px 0 18px;border:2px solid rgba(255,255,255,.8);box-shadow:inset 0 0 30px rgba(255,255,255,.55)}.scene-school{background:linear-gradient(135deg,#dff2ff,#fff5c9)}.scene-park{background:linear-gradient(135deg,#dff7d8,#d8f1ff)}.scene-amusement{background:linear-gradient(135deg,#ffe2f0,#fff2c9)}.scene-space{background:linear-gradient(135deg,#241b4f,#5063a7);color:white}.scene-road{background:linear-gradient(135deg,#e8edf1,#fff5d7)}.scene-sports{background:linear-gradient(135deg,#dcf8ed,#f5ffd9)}.scene-sea{background:linear-gradient(135deg,#d7f4ff,#fff3c4)}.scene-city{background:linear-gradient(135deg,#e5ddff,#dff7ff)}
+.speech{position:relative;background:white;border:3px solid #6d4c41;border-radius:20px;padding:14px 16px;margin:16px auto;max-width:560px;font-weight:800;line-height:1.7}.speech:after{content:"";position:absolute;left:46px;bottom:-17px;border:9px solid transparent;border-top-color:#6d4c41}.speech.wrong{border-color:#ef5350;background:#fff3f3;color:#943737}.speech.wrong:after{border-top-color:#ef5350}.speech.answer{border-color:#43a047;background:#f1fff2;color:#2e6b31}.speech.answer:after{border-top-color:#43a047}.sb-data{background:#f3f8ff;border-left:6px solid #64b5f6;padding:12px 14px;border-radius:10px;margin:12px 0;line-height:1.7}.sb-question{background:#fff6cc;border:2px solid #ffd166;padding:15px;border-radius:14px;font-weight:900;font-size:18px;line-height:1.7}.sb-answer{background:#edfff0;border:2px solid #7acb82;padding:15px;border-radius:14px;line-height:1.7}.book-nav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}.book-nav .sb-btn{min-width:120px}
+.example-card{border:2px solid #a9d7f5;background:#f2fbff;border-radius:18px;padding:16px;margin:14px 0}.example-tag{font-size:12px;font-weight:900;color:#397ba6;letter-spacing:.08em}.example-title{font-size:20px;font-weight:900;color:#41606f;margin:5px 0}.example-row{margin:8px 0;line-height:1.65}.example-row b{color:#5b4b43}.example-note{font-size:12px;color:#8c6d61;background:#fff9e8;padding:8px 10px;border-radius:10px;margin-top:10px}
+.gacha-row{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:10px 0}.gacha-result{flex:1;min-width:200px;background:#fff8ed;border:2px solid #f0d2ad;padding:12px;border-radius:14px;font-weight:900}
+.preview-cover{min-height:420px;border-radius:20px;padding:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:7px double rgba(255,255,255,.8)}.preview-cover .emoji{font-size:80px}.preview-cover h2{font-size:clamp(30px,6vw,54px);margin:10px 0;color:#5d4037;text-shadow:0 2px 0 white}.preview-cover .by{background:rgba(255,255,255,.75);border-radius:999px;padding:7px 13px;font-weight:900}
+.library-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:17px}.book-card{background:white;border-radius:18px;border:2px solid #efd8c2;overflow:hidden;box-shadow:0 8px 18px rgba(80,55,35,.1);display:flex;flex-direction:column}.book-card-cover{min-height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:17px}.book-card-cover .emo{font-size:45px}.book-card-cover h3{margin:7px 0 3px;color:#5d4037;font-size:19px}.book-card .meta{padding:12px 14px;font-size:13px;color:#765}.book-card .actions{padding:0 12px 14px;margin-top:auto}.challenge-answer{min-height:80px}.rate-row{display:flex;gap:8px;flex-wrap:wrap}.rate-btn{border:2px solid #e7d2be;background:white;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:800}.rate-btn.on{background:#fff0dc;border-color:#ff9d6c}.complete-banner{background:linear-gradient(135deg,#e8ffe9,#fff7ce);border:2px solid #8fd698;border-radius:18px;padding:18px;text-align:center;font-size:18px;font-weight:900;margin:16px 0}
+.library-mission{position:sticky;top:76px;z-index:35;background:linear-gradient(135deg,#fff1c7,#ffe0b2);border:3px solid #ff9800;border-radius:20px;padding:16px 18px;margin:14px 0 20px;box-shadow:0 10px 24px rgba(153,91,0,.18);text-align:center}.library-mission.done{background:linear-gradient(135deg,#e4ffe8,#d7f5ff);border-color:#43a047}.library-mission-title{font-size:clamp(20px,4vw,30px);font-weight:1000;color:#8a4b00}.library-mission.done .library-mission-title{color:#2e7d32}.library-progress-track{height:18px;background:white;border:2px solid #efc078;border-radius:999px;overflow:hidden;margin:10px auto 6px;max-width:560px}.library-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#ffb300,#ff7043);transition:width .35s}.library-mission.done .library-progress-fill{background:linear-gradient(90deg,#66bb6a,#26a69a)}.library-count{font-size:22px;font-weight:1000;color:#6d4c41}.library-note{font-size:14px;font-weight:800;color:#7a5a42}
+.sb-modal{position:fixed;inset:0;background:rgba(50,34,25,.55);z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px}.sb-modal-card{background:white;border-radius:22px;padding:22px;max-width:620px;width:100%;max-height:85vh;overflow:auto}.mode-pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;background:#f0f0f0}.mode-pill.shared{background:#e7f8e9;color:#287234}.mode-pill.demo{background:#fff2d7;color:#8a6428}
+@media(max-width:620px){.book-shell{padding:18px;min-height:440px}.book-shell:before{display:none}.book-scene{font-size:46px;min-height:120px}.sb-panel{padding:16px}.book-nav .sb-btn{min-width:0;flex:1}.sb-topbar{align-items:flex-start}.sb-brand{font-size:19px}}
+
+
+
+.case-verify{background:#eef8ff;border:2px solid #9bc9e8;border-radius:16px;padding:14px;margin:14px 0;font-weight:800;color:#35637d}
+.case-verify.ok{background:#e9ffed;border-color:#86d18d;color:#2d6d35}.case-verify.bad{background:#fff0f0;border-color:#ef9a9a;color:#a33}
+.pass-fallback{max-width:520px;margin:14px auto;background:#fff9ef;border:2px dashed #e6bd7b;border-radius:16px;padding:14px}.pass-fallback input{width:100%;box-sizing:border-box;border:2px solid #e1c69f;border-radius:12px;padding:11px;font-size:17px;text-transform:uppercase;letter-spacing:.08em}
+.carry-card{background:linear-gradient(135deg,#edf8ff,#f5f1ff);border:2px solid #a8cae4;border-radius:16px;padding:14px;margin:12px 0;color:#365365}.carry-card b{color:#246d9b}.mission-complete{background:linear-gradient(135deg,#e0ffe6,#e3f5ff);border:4px solid #43a047;border-radius:24px;padding:22px;text-align:center;margin:20px 0;box-shadow:0 12px 30px rgba(46,125,50,.15)}.mission-complete .big{font-size:clamp(28px,5vw,46px);font-weight:1000;color:#2e7d32}
+.locked-info{background:#f4fbff;border:2px solid #b9def7;border-radius:14px;padding:13px;font-weight:900;color:#35637d}
+
+</style>
+</head>
+<body class="storybook-mode">
+<div id="storyApp">
+  <div class="sb-topbar">
+    <div><div class="sb-brand">📚 PHYSICS STORY BOOK</div><div class="sb-sub">物理の物語をつくろう</div></div>
+    <div><span id="modePill" class="mode-pill demo">本部照合中</span></div>
+  </div>
+
+  <section id="sbTransition" class="sb-transition">
+    <div class="sb-transition-card">
+      <div class="sb-case">CASE CLOSED ➜ PERSONAL MISSION</div>
+      <p class="sb-lead">チームで事件を解いた君は、<strong>「物理捜査官」</strong>として次の任務へ進む。<br>今度は、チームで使った捜査ノウハウを一人で使い、<br><strong>未来の捜査官が挑戦する「新しい物理事件」をつくれ。</strong></p>
+      <div id="handoffBadge" class="case-verify">🔐 CSI本部にCASE PASSを照合しています…</div>
+      <div id="manualPassBox" class="pass-fallback sb-hidden">
+        <div style="font-weight:900;margin-bottom:8px">QRを使えないとき</div>
+        <input id="manualPassInput" maxlength="36" placeholder="班端末に表示された CASE PASS を入力">
+        <button class="sb-btn blue full" style="margin-top:10px" onclick="verifyManualPass()">CASE PASSを照合</button>
+      </div>
+      <div style="font-size:62px;margin:8px">🕵️‍♀️👥 ➜ 🔐 ➜ ✍️👤 ➜ 📖</div>
+      <button id="personalStartBtn" class="sb-btn primary" onclick="openIndividualLogin()" disabled>本部認証後に個人ミッション開始</button>
+    </div>
+  </section>
+
+  <section id="sbIndividualLogin" class="sb-panel sb-hidden sb-center">
+    <h1 class="sb-title">あなたの本をつくろう</h1>
+    <p class="sb-lead">班のCASE PASSからクラス・班を引き継ぎました。<br>名前は公開せず、図書館には <b>3年<span id="loginClassView">1</span>組 No.○○</b> と表示されます。</p>
+    <div id="groupCarryView" class="locked-info" style="max-width:560px;margin:0 auto 14px">班情報を確認中…</div>
+    <div class="sb-field" style="max-width:360px;margin:16px auto"><label>出席番号だけ入力</label><input id="studentNoInput" type="number" min="1" max="40" placeholder="例：17"></div>
+    <button class="sb-btn primary" onclick="beginBookMission()">📖 本づくりを始める</button>
+  </section>
+
+  <section id="sbMaker" class="sb-hidden">
+    <div class="sb-panel">
+      <div class="sb-grid">
+        <div><span class="sb-badge sb-anon" id="anonBadge">3年1組 No.00</span><span class="sb-badge sb-theme" id="themeBadge">テーマ</span></div>
+        <div style="text-align:right"><button class="sb-btn blue" onclick="showRandomExample()">💡 作成例を見る</button></div>
+      </div>
+      <div class="sb-mission" id="missionText"></div>
+      <div id="exampleInline" class="example-card"></div>
+      <div style="text-align:right"><button class="sb-btn ghost" onclick="showRandomExample()">🔄 別の例を見る</button></div>
+    </div>
+
+    <div class="sb-progress" id="makerDots"></div>
+    <div class="book-stage">
+      <div class="book-shell">
+        <div id="makerPage"></div>
+      </div>
+      <div class="book-nav">
+        <button id="prevMakerBtn" class="sb-btn ghost" onclick="changeMakerPage(-1)">← 前へ</button>
+        <button id="nextMakerBtn" class="sb-btn primary" onclick="changeMakerPage(1)">次へ →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sbPreview" class="sb-hidden">
+    <div class="sb-panel sb-center">
+      <h1 class="sb-title">✨ 絵本ができました！</h1>
+      <p>ページをめくって、読者からどう見えるか確認しましょう。</p>
+    </div>
+    <div class="sb-progress" id="previewDots"></div>
+    <div class="book-stage"><div class="book-shell"><div id="previewPage"></div></div>
+      <div class="book-nav"><button class="sb-btn ghost" onclick="changePreviewPage(-1)">← 前のページ</button><button class="sb-btn blue" onclick="changePreviewPage(1)">次のページ →</button></div>
+    </div>
+    <div class="sb-panel">
+      <div class="sb-grid"><button class="sb-btn ghost full" onclick="backToMaker()">✏️ 直す</button><button id="publishBookBtn" class="sb-btn green full" onclick="publishBook()">📚 3年<span class="class-inline"></span>組 物理図書館に公開する</button></div>
+      <div id="publishStatus"></div>
+    </div>
+  </section>
+
+  <section id="sbLibrary" class="sb-hidden">
+    <div class="sb-panel">
+      <div class="library-head"><div><h1 class="sb-title" style="font-size:32px;margin:0">📚 3年<span class="class-inline"></span>組 物理図書館</h1><div>友達が作った物理の物語を読んで、問題に挑戦しよう。</div></div><div><button class="sb-btn blue" onclick="loadLibrary()">🔄 本棚を更新</button></div></div>
+      <div id="libraryMission" class="library-mission">
+        <div class="library-mission-title">🎯 最終ミッション：友達の本を <u>2冊以上</u> 読もう！</div>
+        <div class="library-progress-track"><div id="libraryProgressFill" class="library-progress-fill"></div></div>
+        <div class="library-count">達成度：<span id="challengeCounter">0 / 2</span></div>
+        <div id="libraryMissionNote" class="library-note">本を読んで問題に答え、感想を送ると1冊クリアです。</div>
+      </div>
+      <div id="finalCompleteBox" class="mission-complete sb-hidden"><div class="big">🏅 ALL MISSIONS COMPLETE</div><p>班で事件を解き、自分の事件を公開し、友達の事件を2件以上捜査しました。<br><b>物理捜査官ミッション、完全達成！</b></p></div>
+      <div id="libraryGrid" class="library-grid"></div>
+    </div>
+  </section>
+
+  <section id="sbChallenge" class="sb-hidden">
+    <div class="sb-panel"><button class="sb-btn ghost" onclick="backToLibrary()">← 図書館へ</button></div>
+    <div class="sb-progress" id="readerDots"></div>
+    <div class="book-stage"><div class="book-shell"><div id="readerPage"></div></div>
+      <div class="book-nav"><button class="sb-btn ghost" onclick="changeReaderPage(-1)">← 前のページ</button><button class="sb-btn blue" onclick="changeReaderPage(1)">次のページ →</button></div>
+    </div>
+    <div id="readerAnswerArea" class="sb-panel sb-hidden">
+      <h2>🧠 あなたの考え</h2>
+      <div class="sb-field"><textarea id="readerResponse" class="challenge-answer" placeholder="答えや理由を書いてみよう"></textarea></div>
+      <button class="sb-btn yellow full" onclick="revealBookAnswer()">🔓 作者の答えを読む</button>
+      <div id="revealedAnswer" class="sb-hidden" style="margin-top:16px"></div>
+    </div>
+    <div id="feedbackBox" class="sb-panel sb-hidden">
+      <h2>💌 作者へひとこと</h2>
+      <div class="rate-row"><button class="rate-btn" onclick="setBookRate(3,this)">😃 とても分かりやすい</button><button class="rate-btn" onclick="setBookRate(2,this)">🙂 分かった</button><button class="rate-btn" onclick="setBookRate(1,this)">🤔 少し迷った</button></div>
+      <div class="sb-field"><label>「なるほど！」と思ったところ</label><textarea id="goodPoint" placeholder="短く一言でOK"></textarea></div>
+      <button class="sb-btn green full" onclick="sendBookFeedback()">👏 感想を届ける</button><div id="feedbackStatus"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+
+/* =========================================================
+   PHYSICS STORY BOOK JS
+   ========================================================= */
+// ===== 先生の設定エリア =====
+// QRから入った場合はTEAM MISSION側のAPI URLが自動的に引き継がれます。
+// CASE PASS手入力の予備運用をする場合は、同じGAS /exec URLをここにも貼り付けてください。
+const DEFAULT_BOOK_API_URL='ここにGASの/exec URLを貼り付け';
+const queryParams=new URLSearchParams(location.search);
+const DEMO_MODE=queryParams.get('demo')==='1';
+let BOOK_API_URL=(queryParams.get('api')||DEFAULT_BOOK_API_URL||'').trim();
+if(BOOK_API_URL.includes('ここにGAS')) BOOK_API_URL='';
+const bookState={classNum:'',groupNum:'',lessonKey:'',passToken:'',passCode:'',verified:false,studentNo:'',anonName:'',theme:null,skeleton:null,setting:null,character:null,makerPage:0,previewPage:0,readerPage:0,currentBook:null,currentBookId:'',rate:0,done:new Set()};
+
+const bookThemes=[
+ {id:'speed',name:'速さと移動距離',icon:'🏃',mission:'「速さ」と「移動距離」を混同している人が、違いに気づける物語にしよう。'},
+ {id:'uniform',name:'等速直線運動',icon:'🤖',mission:'「時間がたつと速さが変わる」と思っている人が、等速直線運動の意味に気づける物語にしよう。'},
+ {id:'slope',name:'斜面上の運動',icon:'🛒',mission:'「重い物体ほど斜面で速さの増え方が大きい」と思っている人が、考え直せる物語にしよう。'},
+ {id:'reaction',name:'作用・反作用',icon:'🛹',mission:'作用・反作用を「力のつり合い」と混同している人が、2つの違いに気づける物語にしよう。'}
+];
+const settings=[
+ {name:'学校',emoji:'🏫',scene:'scene-school'}, {name:'公園',emoji:'🌳',scene:'scene-park'}, {name:'遊園地',emoji:'🎡',scene:'scene-amusement'}, {name:'宇宙基地',emoji:'🚀',scene:'scene-space'},
+ {name:'道路',emoji:'🚗',scene:'scene-road'}, {name:'スポーツ会場',emoji:'🏟️',scene:'scene-sports'}, {name:'海辺',emoji:'🏖️',scene:'scene-sea'}, {name:'未来都市',emoji:'🌆',scene:'scene-city'}
+];
+const characters=[
+ {name:'中学生の友達',emoji:'🧑‍🎓👩‍🎓'}, {name:'ちょっと早とちりなロボット',emoji:'🤖'}, {name:'自信満々な探偵',emoji:'🕵️'}, {name:'宇宙飛行士',emoji:'👨‍🚀'},
+ {name:'スケートボーダー',emoji:'🛹'}, {name:'陸上部の二人',emoji:'🏃‍♀️🏃'}, {name:'犬と飼い主',emoji:'🐕🧑'}, {name:'科学部の二人',emoji:'🔬🧑‍🎓'}
+];
+const skeletons={
+ speed:[
+  {data:'4秒間で20m進んだ。',q:'このときの速さは何m/sでしょう？',answer:'5m/s',hint:'速さ＝移動距離÷時間'},
+  {data:'5秒間で30m進んだ。',q:'このときの速さは何m/sでしょう？',answer:'6m/s',hint:'30mは「移動距離」、求めるのは1秒あたりの速さ。'},
+  {data:'6秒間で24m進んだ。',q:'このときの速さは何m/sでしょう？',answer:'4m/s',hint:'24÷6で、1秒間に進む距離を求める。'}
+ ],
+ uniform:[
+  {data:'2秒ごとに6mずつ進む等速直線運動をしている。',q:'8秒間では何m進むでしょう？',answer:'24m',hint:'同じ時間に同じ距離ずつ進む。'},
+  {data:'3秒ごとに12mずつ進む等速直線運動をしている。',q:'9秒間では何m進むでしょう？',answer:'36m',hint:'速さは途中で変わらない。'},
+  {data:'4秒ごとに10mずつ進む等速直線運動をしている。',q:'12秒間では何m進むでしょう？',answer:'30m',hint:'4秒分が3回ある。'}
+ ],
+ slope:[
+  {data:'同じ形の台車A（1kg）とB（2kg）を、同じ斜面の同じ位置から静かに離す。',q:'「重いBの方が速さの増え方が大きい」という考えは正しいでしょうか？',answer:'正しくない。同じ斜面なら、質量が違っても速さの増え方は変わらない。',hint:'「重い＝加速が大きい」とは限らない。'},
+  {data:'同じ形の球A（0.5kg）とB（1.5kg）を、同じ斜面の同じ高さから同時に動かす。',q:'質量だけを理由に「Bの方が速くなる」と言えるでしょうか？',answer:'言えない。同じ条件の斜面では、質量だけで速さの増え方は決まらない。',hint:'斜面方向にはたらく重力の分力に注目。'},
+  {data:'同じ斜面で、荷物を積む前と積んだ後の同じ台車を同じ位置から動かす。',q:'荷物を積んだ後の方が、質量が増えたことだけで加速が大きくなるでしょうか？',answer:'ならない。質量だけを変えても、同じ斜面での速さの増え方は変わらない。',hint:'質量だけを変えたときに何が変わるか考える。'}
+ ],
+ reaction:[
+  {data:'Aさんが壁を50Nの力で押している。',q:'壁がAさんを押し返す力は何Nですか。また、この2つの力は「つり合い」ですか？',answer:'50N。作用・反作用の力で、別々の物体にはたらくので「力のつり合い」ではない。',hint:'同じ大きさ・反対向き・別の物体。'},
+  {data:'スケートボードに乗ったAさんがBさんを40Nで押した。',q:'BさんがAさんを押す力は何Nですか。また、この2つの力は「つり合い」ですか？',answer:'40N。作用・反作用であり、別々の人にはたらくため「力のつり合い」ではない。',hint:'押した側だけが力を出しているわけではない。'},
+  {data:'ボールAがボールBを30Nで押した瞬間を考える。',q:'BがAを押す力は何Nですか。また、2つの力は同じ物体にはたらきますか？',answer:'30N。2つの力は別々の物体にはたらく。',hint:'作用と反作用は必ずペア。'}
+ ]
+};
+const examples={
+ speed:[
+  {title:'遅刻しそうなタクミ',story:'朝、タクミは学校へ急いで走っていました。先生が時計で測ると、4秒間で20m進みました。',wrong:'「20m進んだから、速さは20m/sだね！」',question:'タクミの速さは何m/s？',answer:'5m/s。20÷4で、1秒あたり5m進む速さ。'},
+  {title:'海辺のレスキュー犬',story:'海辺でレスキュー犬が一直線に走ります。5秒間で30m進みました。',wrong:'「30mって書いてあるから、速さも30だよ！」',question:'犬の速さは何m/s？',answer:'6m/s。移動距離30mを時間5秒で割る。'},
+  {title:'未来都市の配達ドローン',story:'配達ドローンがビルの間を移動しました。6秒間で24m進みました。',wrong:'「24m進んだなら、速さは24m/sでしょ？」',question:'ドローンの速さは何m/s？',answer:'4m/s。24mは移動距離で、速さは24÷6。'}
+ ],
+ uniform:[
+  {title:'夜のロボット配送',story:'閉店後の店内を配送ロボットが同じ速さで進みます。2秒ごとに6mずつ進んでいました。',wrong:'「長く動くほど、だんだん速くなるはず！」',question:'8秒間では何m進む？',answer:'24m。等速直線運動なので速さは変わらない。'},
+  {title:'宇宙基地の点検車',story:'宇宙基地の廊下を点検車がまっすぐ一定の速さで走っています。3秒ごとに12m進みます。',wrong:'「9秒も走れば、途中からもっと速くなるよ。」',question:'9秒間では何m進む？',answer:'36m。同じ速さなので12mを3回分。'},
+  {title:'体育館の自動カメラ',story:'自動カメラがレールの上を一定の速さで移動します。4秒ごとに10m進みます。',wrong:'「時間が3倍なら、速さも3倍になるんじゃない？」',question:'12秒間では何m進む？',answer:'30m。変わるのは移動距離で、速さは一定。'}
+ ],
+ slope:[
+  {title:'坂道カートの勝負',story:'公園の坂で、同じ形の1kgと2kgのカートを同じ場所から同時に離しました。',wrong:'「2kgの方が重いから、絶対に速さの増え方も大きいよ！」',question:'この予想は正しい？',answer:'正しくない。同じ斜面なら、質量が違っても速さの増え方は変わらない。'},
+  {title:'月面基地の荷物運び',story:'同じ斜面で、荷物を積む前と積んだ後の運搬車を同じ位置から動かします。',wrong:'「荷物を積んで重くしたから、その分だけ加速も大きくなる！」',question:'質量が増えたことだけで加速は大きくなる？',answer:'ならない。同じ斜面では質量だけでは速さの増え方は変わらない。'},
+  {title:'科学部の斜面実験',story:'科学部が同じ形で質量だけ違う2つの物体を、同じ斜面から動かしました。',wrong:'「重い方には重力が大きくはたらくから、必ず速くなるね。」',question:'この説明は正しい？',answer:'正しくない。質量が大きいことだけを理由に、加速が大きいとは言えない。'}
+ ],
+ reaction:[
+  {title:'体育館の押し合い事件',story:'体育館でAさんとBさんが手のひらを合わせて押し合いました。AさんはBさんを40Nで押しました。',wrong:'「Aさんが先に押したから、Aさんの力の方が大きい！」',question:'BさんがAさんを押す力は何N？2つはつり合い？',answer:'40N。作用・反作用で、別々の人にはたらくのでつり合いではない。'},
+  {title:'壁は反撃した？',story:'探偵が壁を50Nの力で押して、壁から受ける力を調べました。',wrong:'「動かない壁は押してこないから、壁からの力は0Nだ！」',question:'壁が探偵を押す力は何N？',answer:'50N。押す力と押し返す力は同じ大きさで反対向き。'},
+  {title:'スケボーで大実験',story:'二人がスケートボードに乗って向かい合い、手で押し合いました。',wrong:'「後ろに動いた人だけが力を受けたんだよ。」',question:'二人の間にはどんな力がはたらく？',answer:'互いに同じ大きさで反対向きの力を及ぼし合う。別々の物体にはたらく作用・反作用。'}
+ ]
+};
+
+function openIndividualLogin(){
+  if(!bookState.verified){sbToast('先にCASE PASSの本部認証が必要です');return;}
+  hideSbSections();showSb('sbIndividualLogin');
+  document.getElementById('loginClassView').textContent=bookState.classNum;
+  const g=document.getElementById('groupCarryView');
+  if(g)g.textContent=`✅ 引き継ぎ完了：3年${bookState.classNum}組 ${bookState.groupNum}班｜TEAM MISSION CASE CLOSED`;
+}
+function beginBookMission(){
+  if(!bookState.verified){sbToast('CASE PASSが確認されていません');return;}
+  const no=String(document.getElementById('studentNoInput').value||'').trim();
+  if(!no||Number(no)<1||Number(no)>40){sbToast('出席番号を入力してください');return;}
+  bookState.studentNo=no;bookState.anonName=`3年${bookState.classNum}組 No.${String(no).padStart(2,'0')}`;
+  bookState.theme=bookThemes[(Number(no)-1)%bookThemes.length];
+  const sks=skeletons[bookState.theme.id];bookState.skeleton=sks[(Number(no)+Number(bookState.classNum)-2)%sks.length];
+  bookState.setting=settings[(Number(no)*3+Number(bookState.classNum))%settings.length];
+  bookState.character=characters[(Number(no)*5+Number(bookState.classNum))%characters.length];
+  bookState.makerPage=0;
+  hideSbSections();showSb('sbMaker');
+  document.getElementById('anonBadge').textContent=bookState.anonName;document.getElementById('themeBadge').textContent=`${bookState.theme.icon} ${bookState.theme.name}`;
+  const carry={speed:'FILE 1「速さと移動距離」',uniform:'FILE 1–2「同じ速さで進む運動」',slope:'FILE 3「斜面上の運動」',reaction:'FILE 4「作用・反作用」'}[bookState.theme.id];
+  document.getElementById('missionText').innerHTML=`<div class="carry-card"><b>TEAM MISSIONから引き継いだ捜査ノウハウ：</b>${escBook(carry)}</div><strong>あなたのPERSONAL MISSION：</strong>${escBook(bookState.theme.mission)}<br><span style="font-size:13px">本部が問題の骨組みを用意します。あなたは「物語」「勘違いの一言」「正しい説明」を加え、未来の捜査官が挑戦する事件ファイルに仕上げよう。</span>`;
+  showRandomExample();renderMaker();
+}
+function hideSbSections(){['sbTransition','sbIndividualLogin','sbMaker','sbPreview','sbLibrary','sbChallenge'].forEach(id=>document.getElementById(id).classList.add('sb-hidden'))}
+function showSb(id){document.getElementById(id).classList.remove('sb-hidden');window.scrollTo(0,0)}
+function exampleHtml(ex){return `<div class="example-tag">作成例｜${escBook(bookState.theme.name)}</div><div class="example-title">📘 ${escBook(ex.title)}</div><div class="example-row"><b>ある日…</b> ${escBook(ex.story)}</div><div class="example-row"><b>💬 勘違い：</b>「${escBook(ex.wrong)}」</div><div class="example-row"><b>❓ 問題：</b>${escBook(ex.question)}</div><div class="example-row"><b>💡 じつは：</b>${escBook(ex.answer)}</div><div class="example-note">※言葉をそのまま写すのではなく、「こんな流れで作ればいいんだ」というヒントとして使おう。</div>`}
+function showRandomExample(){const arr=examples[bookState.theme?bookState.theme.id:'speed'];let ex=arr[Math.floor(Math.random()*arr.length)];const box=document.getElementById('exampleInline');if(box)box.innerHTML=exampleHtml(ex);}
+function renderMaker(){
+  const p=bookState.makerPage;renderDots('makerDots',5,p);document.getElementById('prevMakerBtn').disabled=p===0;document.getElementById('nextMakerBtn').textContent=p===4?'✨ 絵本を完成させる':'次へ →';
+  const c=currentDraft();let html='';
+  if(p===0){html=`<div class="book-page-head"><b>表紙をつくる</b><span class="book-page-num">COVER</span></div><div class="${bookState.setting.scene} preview-cover"><div class="emoji">${bookState.setting.emoji} ${bookState.character.emoji}</div><h2>${escBook(c.title||'タイトルをつけよう')}</h2><div class="by">${escBook(bookState.anonName)}</div></div><div class="sb-field"><label>📕 タイトル</label><input id="draftTitle" value="${attrBook(c.title)}" placeholder="例：暴走！遊園地のカート" oninput="saveDraftField('title',this.value)"></div><div class="gacha-row"><div class="gacha-result">舞台：${bookState.setting.emoji} ${escBook(bookState.setting.name)}</div><button class="sb-btn yellow" onclick="gachaSetting()">🎲 舞台ガチャ</button></div><div class="gacha-row"><div class="gacha-result">登場人物：${bookState.character.emoji} ${escBook(bookState.character.name)}</div><button class="sb-btn yellow" onclick="gachaCharacter()">🎲 キャラガチャ</button></div>`}
+  if(p===1){html=`<div class="book-page-head"><b>1ページ「ある日…」</b><span class="book-page-num">1 / 4</span></div>${sceneHtml()}<div class="sb-data"><b>物語に必ず入れる条件</b><br>${escBook(bookState.skeleton.data)}</div><div class="sb-field"><label>✍️ 2〜4文で物語を書こう</label><textarea id="draftStory" placeholder="例：ある日、遊園地で…" oninput="saveDraftField('story',this.value)">${escBook(c.story)}</textarea></div><div class="example-note">💡 数字や条件は変えず、舞台や登場人物を使って「何が起こったか」を物語にしよう。</div>`}
+  if(p===2){html=`<div class="book-page-head"><b>2ページ「ちょっと待って！」</b><span class="book-page-num">2 / 4</span></div>${sceneHtml()}<div class="sb-data"><b>条件</b><br>${escBook(bookState.skeleton.data)}</div><div class="speech wrong">${c.wrongLine?`「${escBook(c.wrongLine)}」`:'「ここに、登場人物の“勘違い”を書こう！」'}</div><div class="sb-field"><label>💬 登場人物の「勘違いの一言」</label><textarea id="draftWrong" placeholder="例：重い方が絶対に速くなるよ！" oninput="saveDraftField('wrongLine',this.value)">${escBook(c.wrongLine)}</textarea></div><div class="example-note">💡 今日学んだ内容で「ありがちな勘違い」を、キャラクターに言わせてみよう。</div>`}
+  if(p===3){html=`<div class="book-page-head"><b>3ページ「あなたならどう考える？」</b><span class="book-page-num">3 / 4</span></div>${sceneHtml()}<div class="sb-data"><b>条件</b><br>${escBook(bookState.skeleton.data)}</div><div class="speech wrong">「${escBook(c.wrongLine||'作者が考えた勘違いの一言')}</div><div class="sb-question">❓ ${escBook(bookState.skeleton.q)}</div><div class="example-note">このページの問題はアプリが作ってくれます。作者は内容を確認するだけでOK！</div>`}
+  if(p===4){html=`<div class="book-page-head"><b>4ページ「じつは…」</b><span class="book-page-num">4 / 4</span></div>${sceneHtml()}<div class="sb-answer"><b>答え</b><br>${escBook(bookState.skeleton.answer)}</div><div class="sb-field"><label>💡 なぜそうなるのか、自分の言葉で説明しよう</label><textarea id="draftExplanation" placeholder="理科の言葉を使って、友達に伝わるように説明しよう。" oninput="saveDraftField('explanation',this.value)">${escBook(c.explanation)}</textarea></div><div class="example-note">ヒント：${escBook(bookState.skeleton.hint)}</div>`}
+  document.getElementById('makerPage').innerHTML=html;
+}
+function changeMakerPage(d){
+  if(d>0&&!validateMakerPage(bookState.makerPage))return;
+  if(bookState.makerPage===4&&d>0){finishBookDraft();return}
+  bookState.makerPage=Math.max(0,Math.min(4,bookState.makerPage+d));renderMaker();window.scrollTo({top:document.getElementById('sbMaker').offsetTop,behavior:'smooth'});
+}
+function validateMakerPage(p){const c=currentDraft();if(p===0&&!c.title.trim()){sbToast('まずタイトルをつけよう');return false}if(p===1&&c.story.trim().length<15){sbToast('物語をもう少し書こう（目安15文字以上）');return false}if(p===2&&c.wrongLine.trim().length<5){sbToast('登場人物の勘違いの一言を書こう');return false}if(p===4&&c.explanation.trim().length<12){sbToast('「なぜそうなるか」をもう少し説明しよう');return false}return true}
+function draftKey(){return `physicsBookDraft-${bookState.classNum}-${bookState.studentNo}`}
+function currentDraft(){try{return JSON.parse(localStorage.getItem(draftKey())||'{}')}catch(e){return {}}}
+function saveDraftField(k,v){const d=currentDraft();d[k]=v;localStorage.setItem(draftKey(),JSON.stringify(d));}
+function gachaSetting(){bookState.setting=settings[Math.floor(Math.random()*settings.length)];renderMaker()}
+function gachaCharacter(){bookState.character=characters[Math.floor(Math.random()*characters.length)];renderMaker()}
+function sceneHtml(){return `<div class="book-scene ${bookState.setting.scene}">${bookState.setting.emoji}　${bookState.character.emoji}</div>`}
+function finishBookDraft(){if(!validateMakerPage(4))return;bookState.previewPage=0;hideSbSections();showSb('sbPreview');updateClassInline();renderPreview()}
+function bookPayload(){const c=currentDraft();return {passToken:bookState.passToken,classNum:bookState.classNum,groupNum:bookState.groupNum,lessonKey:bookState.lessonKey,studentNo:bookState.studentNo,anonName:bookState.anonName,themeId:bookState.theme.id,themeName:bookState.theme.name,setting:bookState.setting.name,settingEmoji:bookState.setting.emoji,scene:bookState.setting.scene,character:bookState.character.name,characterEmoji:bookState.character.emoji,title:c.title,story:c.story,data:bookState.skeleton.data,question:bookState.skeleton.q,autoAnswer:bookState.skeleton.answer,wrongLine:c.wrongLine,explanation:c.explanation,updatedAt:new Date().toISOString()}}
+function renderPreview(){const p=bookState.previewPage;renderDots('previewDots',5,p);document.getElementById('previewPage').innerHTML=renderBookPage(bookPayload(),p,true)}
+function changePreviewPage(d){bookState.previewPage=(bookState.previewPage+d+5)%5;renderPreview()}
+function backToMaker(){hideSbSections();showSb('sbMaker');renderMaker()}
+function renderBookPage(b,p,showAnswer=false){const scene=b.scene||sceneForName(b.setting);if(p===0)return `<div class="${scene} preview-cover"><div class="emoji">${escBook(b.settingEmoji||'📖')} ${escBook(b.characterEmoji||'🙂')}</div><h2>${escBook(b.title)}</h2><div class="by">${escBook(b.anonName)}</div><div style="margin-top:12px"><span class="sb-badge sb-theme">${escBook(b.themeName)}</span></div></div>`;
+ if(p===1)return `<div class="book-page-head"><b>1ページ「ある日…」</b><span class="book-page-num">1 / 4</span></div><div class="book-scene ${scene}">${escBook(b.settingEmoji||'📖')}　${escBook(b.characterEmoji||'🙂')}</div><p style="font-size:18px;line-height:1.9">${nl2brBook(b.story)}</p><div class="sb-data"><b>手がかり</b><br>${escBook(b.data)}</div>`;
+ if(p===2)return `<div class="book-page-head"><b>2ページ「ちょっと待って！」</b><span class="book-page-num">2 / 4</span></div><div class="book-scene ${scene}">${escBook(b.settingEmoji||'📖')}　${escBook(b.characterEmoji||'🙂')}</div><div class="speech wrong">「${escBook(b.wrongLine)}」</div>`;
+ if(p===3)return `<div class="book-page-head"><b>3ページ「あなたならどう考える？」</b><span class="book-page-num">3 / 4</span></div><div class="sb-data"><b>条件</b><br>${escBook(b.data)}</div><div class="sb-question">❓ ${escBook(b.question)}</div>`;
+ return `<div class="book-page-head"><b>4ページ「じつは…」</b><span class="book-page-num">4 / 4</span></div>${showAnswer?`<div class="sb-answer"><b>答え</b><br>${escBook(b.autoAnswer)}</div><div class="speech answer">${nl2brBook(b.explanation)}</div>`:'<div class="sb-question">答えは、自分で考えてから開こう！</div>'}`
+}
+function renderDots(id,n,on){const el=document.getElementById(id);el.innerHTML=Array.from({length:n},(_,i)=>`<span class="sb-dot ${i===on?'on':''}"></span>`).join('')}
+function sceneForName(name){return (settings.find(s=>s.name===name)||settings[0]).scene}
+function updateClassInline(){document.querySelectorAll('.class-inline').forEach(x=>x.textContent=bookState.classNum)}
+async function publishBook(){
+ const b=bookPayload();const btn=document.getElementById('publishBookBtn');btn.disabled=true;document.getElementById('publishStatus').innerHTML='<p>本部へ作品を送信中…</p>';
+ try{
+   let j;
+   if(DEMO_MODE){const a=JSON.parse(localStorage.getItem('physicsStoryBooks')||'[]');b.id=`demo-${bookState.classNum}-${bookState.studentNo}`;a.push(b);localStorage.setItem('physicsStoryBooks',JSON.stringify(a));j={ok:true,id:b.id};}
+   else{j=await apiPost('publishStory',b);}
+   if(!j.ok)throw new Error(j.error||'publish failed');
+   bookState.currentBookId=j.id;document.getElementById('publishStatus').innerHTML='<div class="complete-banner">📚 提出・公開完了！次はCSI ARCHIVESで友達の事件を2件以上捜査しよう。</div>';
+   setTimeout(openLibrary,650);
+ }catch(e){document.getElementById('publishStatus').innerHTML='<div class="complete-banner" style="border-color:#ef9a9a;background:#fff1f1">公開できませんでした。本部との通信を確認し、必ず送信してください。</div>';btn.disabled=false;}
+}
+function openLibrary(){hideSbSections();showSb('sbLibrary');updateClassInline();updateLibraryMission();loadLibrary()}
+function updateLibraryMission(){const n=bookState.done.size;const counter=document.getElementById('challengeCounter');const fill=document.getElementById('libraryProgressFill');const box=document.getElementById('libraryMission');const note=document.getElementById('libraryMissionNote');const finalBox=document.getElementById('finalCompleteBox');if(counter)counter.textContent=`${n} / 2`;if(fill)fill.style.width=`${Math.min(n/2,1)*100}%`;if(box)box.classList.toggle('done',n>=2);if(finalBox)finalBox.classList.toggle('sb-hidden',n<2);if(note)note.textContent=n>=2?'🏅 最終ミッション達成！ 班→個人→交流まで完了しました。':n===1?'あと1件！ 別の捜査官が作った事件にも挑戦しよう。':'事件ファイルを読み、自分の考え→作者の解説→コメントまで終えると1件クリアです。';}
+async function loadLibrary(){
+ const grid=document.getElementById('libraryGrid');grid.innerHTML='<p>CSI ARCHIVESを読み込み中…</p>';let list=[];
+ try{
+   if(DEMO_MODE){seedDemoBooks();list=JSON.parse(localStorage.getItem('physicsStoryBooks')||'[]').filter(x=>String(x.classNum)===String(bookState.classNum));}
+   else{
+     const pr=await apiGet('progress',{pass:bookState.passToken,studentNo:bookState.studentNo});if(pr.ok){bookState.done=new Set(pr.storyIds||[]);updateLibraryMission();}
+     const j=await apiGet('listStories',{pass:bookState.passToken});if(!j.ok)throw new Error(j.error||'load failed');list=j.items||[];
+   }
+   list=list.filter(x=>String(x.studentNo)!==String(bookState.studentNo));
+   if(!list.length){grid.innerHTML='<div class="complete-banner">まだ友達の事件ファイルがありません。少し後で「本棚を更新」を押してみよう。</div>';return}
+   grid.innerHTML=list.map(b=>bookCardHtml(b)).join('');
+ }catch(e){grid.innerHTML='<div class="complete-banner" style="background:#fff1f1;border-color:#ef9a9a">CSI ARCHIVESを読み込めませんでした。本部との通信を確認してください。</div>'}
+}
+function bookCardHtml(b){const sc=b.scene||sceneForName(b.setting);return `<article class="book-card"><div class="book-card-cover ${sc}"><div class="emo">${escBook(b.settingEmoji||'📖')} ${escBook(b.characterEmoji||'🙂')}</div><h3>${escBook(b.title)}</h3><span class="sb-badge sb-theme">${escBook(b.themeName)}</span></div><div class="meta">${escBook(b.anonName||`3年${b.classNum}組 No.${String(b.studentNo).padStart(2,'0')}`)}</div><div class="actions"><button class="sb-btn blue full" onclick='openBookChallenge(${JSON.stringify(JSON.stringify(b))})'>📖 この本を読む</button></div></article>`}
+function openBookChallenge(serialized){bookState.currentBook=JSON.parse(serialized);bookState.currentBookId=bookState.currentBook.id;bookState.readerPage=0;bookState.rate=0;hideSbSections();showSb('sbChallenge');document.getElementById('readerAnswerArea').classList.add('sb-hidden');document.getElementById('feedbackBox').classList.add('sb-hidden');document.getElementById('revealedAnswer').classList.add('sb-hidden');document.getElementById('readerResponse').value='';document.getElementById('goodPoint').value='';document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('on'));renderReader()}
+function renderReader(){renderDots('readerDots',4,Math.min(bookState.readerPage,3));document.getElementById('readerPage').innerHTML=renderBookPage(bookState.currentBook,bookState.readerPage,false);if(bookState.readerPage===3)document.getElementById('readerAnswerArea').classList.remove('sb-hidden')}
+function changeReaderPage(d){bookState.readerPage=Math.max(0,Math.min(3,bookState.readerPage+d));renderReader()}
+async function revealBookAnswer(){if(document.getElementById('readerResponse').value.trim().length<2){sbToast('まず自分の考えを書いてみよう');return}let ans=bookState.currentBook.autoAnswer||'',exp=bookState.currentBook.explanation||'';try{if(!DEMO_MODE){const j=await apiGet('getAnswer',{pass:bookState.passToken,id:bookState.currentBookId});if(j.ok){ans=j.autoAnswer;exp=j.explanation}}}catch(e){}document.getElementById('revealedAnswer').innerHTML=`<div class="sb-answer"><b>作者の答え</b><br>${escBook(ans)}</div><div class="speech answer">${nl2brBook(exp)}</div>`;document.getElementById('revealedAnswer').classList.remove('sb-hidden');document.getElementById('feedbackBox').classList.remove('sb-hidden')}
+function setBookRate(v,el){bookState.rate=v;document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('on'));el.classList.add('on')}
+async function sendBookFeedback(){const good=document.getElementById('goodPoint').value.trim();if(!bookState.rate||!good){sbToast('読みやすさを選び、「なるほど」と思ったところを一言書こう');return}const p={passToken:bookState.passToken,storyId:bookState.currentBookId,fromClass:bookState.classNum,fromGroup:bookState.groupNum,fromStudentNo:bookState.studentNo,rate:bookState.rate,response:document.getElementById('readerResponse').value.trim(),good,updatedAt:new Date().toISOString()};try{let j;if(DEMO_MODE){const a=JSON.parse(localStorage.getItem('physicsStoryFeedback')||'[]');a.push(p);localStorage.setItem('physicsStoryFeedback',JSON.stringify(a));bookState.done.add(bookState.currentBookId);j={ok:true,count:bookState.done.size,storyIds:[...bookState.done]};}else{j=await apiPost('feedback',p);if(!j.ok)throw new Error(j.error||'feedback failed');bookState.done=new Set(j.storyIds||[]);}updateLibraryMission();document.getElementById('feedbackStatus').innerHTML=bookState.done.size>=2?'<div class="complete-banner">🏅 FINAL MISSION COMPLETE！2件以上の物理事件を捜査しました。</div>':'<div class="complete-banner">👏 1件クリア！あと1件で最終ミッション達成です。</div>';setTimeout(()=>{backToLibrary()},1100)}catch(e){document.getElementById('feedbackStatus').innerHTML='<div class="complete-banner" style="background:#fff1f1;border-color:#ef9a9a">送信できませんでした。コメント送信までが1件の捜査です。もう一度試してください。</div>'}}
+function backToLibrary(){hideSbSections();showSb('sbLibrary');loadLibrary()}
+function apiConfigured(){return BOOK_API_URL.startsWith('https://script.google.com/')&&BOOK_API_URL.includes('/exec')}
+async function apiGet(action,params={}){const q=new URLSearchParams({action,...params,t:String(Date.now())});const r=await fetch(`${BOOK_API_URL}?${q.toString()}`);if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}
+async function apiPost(action,payload){const r=await fetch(BOOK_API_URL,{method:'POST',body:new URLSearchParams({action,payload:JSON.stringify(payload)})});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}
+function updateBookMode(){const el=document.getElementById('modePill');if(!el)return;if(DEMO_MODE){el.textContent='🧪 先生用デモ';el.className='mode-pill demo';return}el.textContent=bookState.verified?'✅ CASE VERIFIED':'🔐 本部照合中';el.className='mode-pill '+(bookState.verified?'shared':'demo')}
+function seedDemoBooks(){let a=JSON.parse(localStorage.getItem('physicsStoryBooks')||'[]');if(a.some(x=>String(x.id||'').startsWith('demo-book-')))return;const demos=[
+ {studentNo:'31',themeId:'uniform',themeName:'等速直線運動',setting:'未来都市',settingEmoji:'🌆',scene:'scene-city',character:'ロボット',characterEmoji:'🤖',title:'夜のロボット配送',story:'閉店後の未来都市で、配送ロボットが同じ速さで荷物を運んでいました。2秒ごとに6mずつ進んでいます。',data:'2秒ごとに6mずつ進む等速直線運動をしている。',question:'8秒間では何m進むでしょう？',autoAnswer:'24m',wrongLine:'長く動くほど、だんだん速くなるはず！',explanation:'等速直線運動では速さは一定なので、2秒で6mを4回分進み、24mになります。'},
+ {studentNo:'32',themeId:'reaction',themeName:'作用・反作用',setting:'スポーツ会場',settingEmoji:'🏟️',scene:'scene-sports',character:'中学生',characterEmoji:'🧑‍🎓',title:'体育館の押し合い事件',story:'体育館で二人が手のひらを合わせて押し合いました。AさんはBさんを40Nで押しています。',data:'AさんがBさんを40Nで押している。',question:'BさんがAさんを押す力は何Nですか。また、この2つの力は「つり合い」ですか？',autoAnswer:'40N。つり合いではない。',wrongLine:'Aさんが先に押したから、Aさんの力の方が大きい！',explanation:'作用と反作用は同じ大きさで反対向きですが、別々の物体にはたらくので、力のつり合いではありません。'},
+ {studentNo:'33',themeId:'slope',themeName:'斜面上の運動',setting:'公園',settingEmoji:'🌳',scene:'scene-park',character:'科学部',characterEmoji:'🔬',title:'坂道カートの勝負',story:'公園の坂道で、同じ形の1kgと2kgのカートを同じ位置から同時に離しました。',data:'同じ形の台車A（1kg）とB（2kg）を、同じ斜面の同じ位置から静かに離す。',question:'「重いBの方が速さの増え方が大きい」という考えは正しいでしょうか？',autoAnswer:'正しくない。',wrongLine:'2kgの方が重いから、絶対に速さの増え方も大きいよ！',explanation:'同じ斜面なら、質量が違っても速さの増え方は変わりません。'},
+ {studentNo:'34',themeId:'speed',themeName:'速さと移動距離',setting:'海辺',settingEmoji:'🏖️',scene:'scene-sea',character:'犬と飼い主',characterEmoji:'🐕🧑',title:'海辺のレスキュー犬',story:'海辺でレスキュー犬が一直線に走りました。5秒間で30m進みました。',data:'5秒間で30m進んだ。',question:'このときの速さは何m/sでしょう？',autoAnswer:'6m/s',wrongLine:'30m進んだから、速さも30m/sだよ！',explanation:'30mは移動距離です。速さは移動距離÷時間なので、30÷5＝6m/sです。'}
+ ];for(let c=1;c<=3;c++)for(const d of demos)a.push({...d,id:`demo-book-${c}-${d.studentNo}`,classNum:String(c),anonName:`3年${c}組 No.${d.studentNo}`});localStorage.setItem('physicsStoryBooks',JSON.stringify(a))}
+function escBook(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function attrBook(s){return escBook(s).replace(/\n/g,' ')}function nl2brBook(s){return escBook(s).replace(/\n/g,'<br>')}
+function sbToast(msg){let t=document.getElementById('sbToast');if(!t){t=document.createElement('div');t.id='sbToast';t.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#5d4037;color:white;padding:12px 18px;border-radius:999px;z-index:9999;font-weight:bold;box-shadow:0 8px 22px rgba(0,0,0,.2)';document.body.appendChild(t)}t.textContent=msg;t.style.display='block';clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.display='none',2200)}
+async function verifyPassValue(value){
+ const badge=document.getElementById('handoffBadge');const start=document.getElementById('personalStartBtn');
+ badge.className='case-verify';badge.textContent='🔐 CSI本部にCASE PASSを照合しています…';start.disabled=true;
+ try{
+   if(DEMO_MODE){bookState.passToken=value||'DEMO';bookState.classNum=queryParams.get('classNum')||'1';bookState.groupNum=queryParams.get('groupNum')||'1';bookState.lessonKey='DEMO';bookState.passCode='DEMO2026';bookState.verified=true;}
+   else{
+     if(!apiConfigured())throw new Error('GAS URLが設定されていません');
+     const j=await apiGet('verifyPass',{pass:value});if(!j.ok)throw new Error(j.error||'CASE PASS invalid');
+     bookState.passToken=value;bookState.classNum=String(j.classNum);bookState.groupNum=String(j.groupNum);bookState.lessonKey=String(j.lessonKey||'');bookState.passCode=String(j.passCode||'');bookState.verified=true;
+   }
+   badge.className='case-verify ok';badge.textContent=`✅ 本部認証済み｜3年${bookState.classNum}組 ${bookState.groupNum}班｜TEAM MISSION CASE CLOSED`;
+   start.disabled=false;start.textContent='🔓 PERSONAL MISSION START';document.getElementById('manualPassBox').classList.add('sb-hidden');updateBookMode();
+ }catch(e){bookState.verified=false;badge.className='case-verify bad';badge.textContent='⚠ CASE PASSを確認できません。班端末のQRから入り直すか、CASE PASSを入力してください。';document.getElementById('manualPassBox').classList.remove('sb-hidden');start.disabled=true;updateBookMode();}
+}
+async function verifyManualPass(){const v=document.getElementById('manualPassInput').value.trim().toUpperCase();if(!v){sbToast('CASE PASSを入力してください');return}await verifyPassValue(v)}
+async function initPersonalApp(){
+ document.body.classList.add('storybook-mode');document.getElementById('storyApp').style.display='block';updateBookMode();
+ const pass=queryParams.get('pass')||'';
+ if(pass){await verifyPassValue(pass);}
+ else if(DEMO_MODE){await verifyPassValue('DEMO');}
+ else{document.getElementById('handoffBadge').className='case-verify bad';document.getElementById('handoffBadge').textContent='班のCASE PASSが必要です。班端末のQRを読み取ってください。';document.getElementById('manualPassBox').classList.remove('sb-hidden');}
+}
+initPersonalApp();
+
+</script>
+</body>
+</html>
